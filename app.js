@@ -77,7 +77,37 @@ app.get("/contact", async (req, res) => {
     });
   }
 });
+// ✅ DELETE MESSAGE API (UPDATED TO USE CORRECT MODEL)
+app.delete("/contact/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const contactSchema = new mongoose.Schema({
+      name: String,
+      email: String,
+      subject: String,
+      message: String,
+    });
+
+    const BazilDevADMIN =
+      mongoose.models.BazilDevADMIN ||
+      mongoose.model("BazilDevADMIN", contactSchema);
+
+    // Changed "Contact" to "BazilDevADMIN" to match your actual model
+    const deletedMessage = await BazilDevADMIN.findByIdAndDelete(id);
+
+    if (!deletedMessage) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Message not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Deleted successfully" });
+  } catch (error) {
+    console.error("Delete Error:", error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+});
 app.listen(PORT, () => {
   console.log("Server is listening at port " + PORT);
 });
