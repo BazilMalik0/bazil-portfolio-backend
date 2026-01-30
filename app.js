@@ -15,64 +15,72 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ✅ 1. DEFINE SCHEMA OUTSIDE THE ROUTE (The Fix)
+const contactSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phone: { type: String, required: true }, // Added Phone
+  subject: { type: String, required: true },
+  message: { type: String, required: true },
+  file: {
+    data: Buffer,
+    contentType: String,
+    fileName: String,
+  }, // Added File
+  createdAt: { type: Date, default: Date.now },
+});
+// ✅ 2. INITIALIZE MODEL ONCE
+const BazilDevADMIN =
+  mongoose.models.BazilDevADMIN ||
+  mongoose.model("BazilDevADMIN", contactSchema);
 // 2. Setup Multer for memory storage (Required for File Uploads)
 const upload = multer({ storage: multer.memoryStorage() });
-
-// 3. Updated POST Route (Using the upload middleware + controller)
-// 'file' must match the key used in your frontend: dataToSend.append("file", ...)
 app.post("/contact", upload.single("file"), async (req, res) => {
-  // This calls your controller logic
-  // If you have a separate controller file, import it and use it here:
-  // submitContactForm(req, res);
-
-  /* Internal logic for quick testing or if not using separate file: */
   try {
     const { name, email, phone, subject, message } = req.body;
-    const contactSchema = new mongoose.Schema({
-      name: String,
-      email: String,
-      phone: String,
-      subject: String,
-      message: String,
-      file: { data: Buffer, contentType: String, fileName: String },
-    });
-    const BazilDevADMIN =
-      mongoose.models.BazilDevADMIN ||
-      mongoose.model("BazilDevADMIN", contactSchema);
 
-    const data = { name, email, phone, subject, message };
+    const newContact = {
+      name,
+      email,
+      phone,
+      subject,
+      message,
+    };
+
+    // Check if file exists in the request
     if (req.file) {
-      data.file = {
+      newContact.file = {
         data: req.file.buffer,
         contentType: req.file.mimetype,
         fileName: req.file.originalname,
       };
     }
-    await BazilDevADMIN.create(data);
-    res
-      .status(201)
-      .json({ success: true, message: "Message sent successfully" });
+
+    await BazilDevADMIN.create(newContact);
+
+    res.status(201).json({ success: true, message: "Message saved to DB!" });
   } catch (err) {
+    console.error("DB Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// ✅ GET ALL MESSAGES (Updated to include Phone)
 app.get("/contact", async (req, res) => {
-  const BazilDevADMIN = mongoose.models.BazilDevADMIN;
-  const messages = await BazilDevADMIN.find().sort({ _id: -1 });
-  res.status(200).json(messages);
+  try {
+    const messages = await BazilDevADMIN.find().sort({ _id: -1 });
+    res.status(200).json(messages);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch" });
+  }
 });
 
 // ✅ DELETE MESSAGE
 app.delete("/contact/:id", async (req, res) => {
   const { id } = req.params;
-  const BazilDevADMIN = mongoose.models.BazilDevADMIN;
   await BazilDevADMIN.findByIdAndDelete(id);
-  res.status(200).json({ success: true, message: "Deleted successfully" });
+  res.status(200).json({ success: true, message: "Deleted" });
 });
 
-// Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
