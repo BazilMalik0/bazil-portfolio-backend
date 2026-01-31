@@ -3,19 +3,23 @@ import mongoose from "mongoose";
 const contactSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
-  phone: { type: String, required: true }, // Added Phone
+  phone: { type: String, required: true },
   subject: { type: String, required: true },
   message: { type: String, required: true },
+
   file: {
-    // Added File Object
     data: Buffer,
     contentType: String,
     fileName: String,
   },
-  date: { type: Date, default: Date.now },
+
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-// Use the model name you prefer (BazilDevADMIN as per your app.js)
+// SAME model name you were already using
 const ContactMessage =
   mongoose.models.BazilDevADMIN ||
   mongoose.model("BazilDevADMIN", contactSchema);

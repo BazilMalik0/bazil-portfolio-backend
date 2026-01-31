@@ -1,20 +1,20 @@
 {
+  "type": "module",
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
-  "type": "commonjs",
   "scripts": {
-    "backend": "nodemon app.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "mongoose": "^9.1.1",
+    "mongoose": "^9.1.5",
     "multer": "^2.0.2"
   },
   "devDependencies": {
