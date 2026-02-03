@@ -55,10 +55,12 @@ export const getAllMessages = async (req, res) => {
 // DELETE MESSAGE
 export const deleteMessage = async (req, res) => {
   try {
+    //store snapshot for next db
     const deleted = await ContactMessage.findByIdAndDelete(req.params.id);
     if (!deleted) {
       return res.status(404).json({ message: "Message not found" });
     }
+    //code to store in next db
     res.json({ success: true, message: "Deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Delete failed" });
@@ -82,5 +84,31 @@ export const adminLogin = async (req, res) => {
       success: false,
       message: "Invalid credentials",
     });
+  }
+};
+// Add this to your controllers/contactController.js
+export const updateMessageFlag = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { flag } = req.body; // Expecting { flag: 1 } for trash or { flag: 0 } for restore
+
+    const updated = await ContactMessage.findByIdAndUpdate(
+      id,
+      { flag: flag },
+      { new: true },
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Flag updated successfully",
+      data: updated,
+    });
+  } catch (error) {
+    console.error("Update Flag Error:", error);
+    res.status(500).json({ message: "Update failed" });
   }
 };

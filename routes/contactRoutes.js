@@ -5,6 +5,7 @@ import {
   getAllMessages,
   deleteMessage,
   adminLogin, // 1. Add this import
+  updateMessageFlag, // 1. Add this import
 } from "../controllers/contactController.js";
 
 const router = express.Router();
@@ -20,5 +21,7 @@ router.delete("/:id", deleteMessage);
 
 // 2. ADD THIS NEW ROUTE
 router.post("/login", adminLogin);
+// 3. ADD THIS NEW PUT ROUTE
+router.put("/:id", updateMessageFlag);
 
 export default router;
